@@ -6,7 +6,7 @@
 /*   By: dcano-ro <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/09 12:01:48 by dcano-ro          #+#    #+#             */
-/*   Updated: 2022/01/27 18:12:05 by dcano-ro         ###   ########.fr       */
+/*   Updated: 2022/02/13 16:13:41 by dcano-ro         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include <stdlib.h>
@@ -56,11 +56,20 @@ static	int	count_ft_split(const char *str, char c)
 	return (i1);
 }
 
-char	**ft_split(char const *str, char c)
+char	**clear_leaks(char **words, int nwords)
+{
+	int	i;
+
+	i = 0;
+	while (i < nwords)
+		free(words[i++]);
+	free(words);
+	return (NULL);
+}
+
+char	**main_logic(char const *str, char c, int last, int *i)
 {
 	char	**words;
-	int		i[2];
-	int		last;
 
 	if (!str)
 		return (NULL);
@@ -76,6 +85,8 @@ char	**ft_split(char const *str, char c)
 		{
 			if (i[0] - last - 1)
 				words[i[1]++] = fill_new(str, last, i[0]);
+			if (i[0] - last - 1 && !words[i[1] - 1])
+				return (clear_leaks(words, i[1] - 1));
 			last = i[0];
 		}
 	}
@@ -83,4 +94,13 @@ char	**ft_split(char const *str, char c)
 		words[i[1]++] = fill_new(str, last, i[0]);
 	words[i[1]] = NULL;
 	return (words);
+}
+
+char	**ft_split(char const *str, char c)
+{
+	int	last;
+	int	i[2];
+
+	last = 0;
+	return (main_logic(str, c, last, i));
 }
